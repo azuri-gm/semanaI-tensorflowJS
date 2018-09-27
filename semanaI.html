@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body onload="init();">
+
+  <!-- Load TensorFlow.js -->
+  <script src="https://unpkg.com/@tensorflow/tfjs"></script>
+  <!-- Load Posenet -->
+  <script src="https://unpkg.com/@tensorflow-models/posenet">
+
+
+
+  </script>
+  <!-- Load index.js file-->
+  <script src="index.js"></script>
+
+  </p>
+  <video onclick="snapshot();" width=400 height=400 id="video" controls autoplay style="display:none;"></video>
+
+  <canvas id="myCanvas" width="400" height="400"></canvas> <br>
+</body>
+
+</html>
