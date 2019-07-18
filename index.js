@@ -76,7 +76,11 @@ function init() {
                     ctx.beginPath();
                     ctx.fillStyle = 'Red';
                     ctx.rect(Obj.position.x, Obj.position.y, 3, 3);
-                    ctx.fillText(Obj.part, Obj.position.x + 10, Obj.position.y);
+                    ctx.fillText(
+                      Obj.part,
+                      Obj.position.x + 10,
+                      Obj.position.y
+                    );
                     ctx.fillStyle = 'Yellow';
                     ctx.fill();
                   }

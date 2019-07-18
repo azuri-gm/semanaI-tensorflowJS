@@ -1,180 +1,142 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-</head>
-
-<body onload="init();">
-
-  <!-- Load TensorFlow.js -->
-  <script src="https://unpkg.com/@tensorflow/tfjs"></script>
-  <!-- Load Posenet -->
-  <script src="https://unpkg.com/@tensorflow-models/posenet">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  </script>
-
-  </p>
-  <video onclick="snapshot();" width=400 height=400 id="video" controls autoplay style="display:none;"></video>
-
-  <canvas id="myCanvas" width="400" height="400"></canvas> <br>
-</body>
-<script>
-  //--------------------
-  // GET USER MEDIA CODE
-  //--------------------
-  navigator.getUserMedia = (navigator.getUserMedia ||
-    navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia ||
-    navigator.msGetUserMedia);
-
-  var video;
-  var webcamStream;
-  startWebcam();
-
-
-
-  function startWebcam() {
-    if (navigator.getUserMedia) {
-      navigator.getUserMedia(
-        // constraints
-        {
-          video: true,
-          audio: false
+  <head>
+    <script
+      type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+    ></script>
+  </head>
+
+  <body onload="init();">
+    <!-- Load TensorFlow.js -->
+    <script src="https://unpkg.com/@tensorflow/tfjs"></script>
+    <!-- Load Posenet -->
+    <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
+
+    <video
+      onclick="snapshot();"
+      width="400"
+      height="400"
+      id="video"
+      controls
+      autoplay
+      style="display:none;"
+    ></video>
+
+    <canvas id="myCanvas" width="400" height="400"></canvas> <br />
+  </body>
+  <script>
+    //--------------------
+    // GET USER MEDIA CODE
+    //--------------------
+    navigator.getUserMedia =
+      navigator.getUserMedia ||
+      navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia ||
+      navigator.msGetUserMedia;
+
+    var video;
+    var webcamStream;
+    startWebcam();
+
+    function startWebcam() {
+      if (navigator.getUserMedia) {
+        console.log('entered shit');
+        navigator.getUserMedia(
+          // constraints
+          {
+            video: true,
+            audio: false
+          },
+
+          // successCallback
+          function(localMediaStream) {
+            console.log(
+              'TCL: startWebcam -> localMediaStream',
+              localMediaStream
+            );
+            video = document.querySelector('video');
+            video.src = window.URL.createObjectURL(localMediaStream);
+            webcamStream = localMediaStream;
+          },
+
+          // errorCallback
+          function(err) {
+            console.log('The following error occured: ' + err);
+          }
+        );
+      } else {
+        console.log('getUserMedia not supported');
+      }
+    }
+
+    var canvas, ctx;
+
+    function init() {
+      var imageScaleFactor = 0.5;
+      var outputStride = 16;
+      var flipHorizontal = false;
+      const maxPoseDetections = 5; // get up to 5 poses
+      const scoreThreshold = 0.6; // minimum confidence of the root part of a pose
+      const nmsRadius = 20; // minimum distance in pixels between the root parts of poses
+      canvas = document.getElementById('myCanvas');
+      video = document.querySelector('video');
+      ctx = canvas.getContext('2d');
+      ctx.font = '10px Arial';
+      canvas.height = video.height;
+      canvas.width = video.width;
+      var ScaleFactor = 0;
+
+      video.addEventListener(
+        'play',
+        function() {
+          var $this = this; //cache
+
+          posenet.load().then(function(net) {
+            (function loop() {
+              net
+                .estimateMultiplePoses(
+                  video,
+                  imageScaleFactor,
+                  flipHorizontal,
+                  outputStride,
+                  maxPoseDetections,
+                  scoreThreshold,
+                  nmsRadius
+                )
+                .then(function(pose) {
+                  for (var index in pose) {
+                    var attr = pose[index]['keypoints'];
+                    for (var index2 in attr) {
+                      var Obj = attr[index2];
+
+                      if (Obj.score >= scoreThreshold) {
+                        ctx.beginPath();
+                        ctx.fillStyle = 'Red';
+                        ctx.rect(
+                          Obj.position.x,
+                          Obj.position.y,
+                          3,
+                          3
+                        );
+                        ctx.fillText(
+                          Obj.part,
+                          Obj.position.x + 10,
+                          Obj.position.y
+                        );
+                        ctx.fillStyle = 'Yellow';
+                        ctx.fill();
+                      } // si el punto pasa el Threshold
+                    } // cada punto recorre esto
+                  } // cada persona recorre esto
+                });
+              ctx.drawImage($this, 0, 0, canvas.width, canvas.height);
+              setTimeout(loop, 1000 / 30); // drawing at 30fps
+            })();
+          });
         },
-
-        // successCallback
-        function (localMediaStream) {
-          video = document.querySelector('video');
-          video.src = window.URL.createObjectURL(localMediaStream);
-          webcamStream = localMediaStream;
-        },
-
-        // errorCallback
-        function (err) {
-          console.log("The following error occured: " + err);
-        }
+        0
       );
     }
-    else {
-      console.log("getUserMedia not supported");
-    }
-  }
-
-
-  var canvas, ctx;
-
-  function init() {
-    var imageScaleFactor = 0.5;
-    var outputStride = 16;
-    var flipHorizontal = false;
-    const maxPoseDetections = 5;// get up to 5 poses
-    const scoreThreshold = 0.6;// minimum confidence of the root part of a pose
-    const nmsRadius = 20;// minimum distance in pixels between the root parts of poses
-    canvas = document.getElementById("myCanvas");
-    video = document.querySelector('video');
-    ctx = canvas.getContext('2d');
-    ctx.font = "10px Arial";
-    canvas.height = video.height;
-    canvas.width = video.width;
-    var ScaleFactor = 0;
-
-
-
-    video.addEventListener('play', function () {
-      var $this = this; //cache
-
-      posenet.load().then(function (net) {
-        (function loop() {
-          net.estimateMultiplePoses(video, imageScaleFactor, flipHorizontal, outputStride, maxPoseDetections, scoreThreshold, nmsRadius).then(function (pose) {
-
-            for (var index in pose) {
-              var attr = pose[index]['keypoints'];
-              for (var index2 in attr) {
-                var Obj = attr[index2];
-
-                if (Obj.score >= scoreThreshold) {
-                  ctx.beginPath();
-                  ctx.fillStyle = "Red";
-                  ctx.rect(Obj.position.x, Obj.position.y, 3, 3);
-                  ctx.fillText(Obj.part, Obj.position.x + 10, Obj.position.y);
-                  ctx.fillStyle = "Yellow";
-                  ctx.fill();
-                }// si el punto pasa el Threshold
-              } // cada punto recorre esto
-            }// cada persona recorre esto
-          })
-          ctx.drawImage($this, 0, 0, canvas.width, canvas.height);
-          setTimeout(loop, 1000 / 30); // drawing at 30fps
-        })();
-      })
-    }, 0);
-  }
-
-
-
-</script>
-
+  </script>
 </html>
