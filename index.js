@@ -14,18 +14,18 @@ function startWebcam() {
       // constraints
       {
         video: true,
-        audio: false
+        audio: false,
       },
 
       // successCallback
-      function(localMediaStream) {
+      function (localMediaStream) {
         video = document.querySelector('video');
         video.src = window.URL.createObjectURL(localMediaStream);
         webcamStream = localMediaStream;
       },
 
       // errorCallback
-      function(err) {
+      function (err) {
         console.log('The following error occured: ' + err);
       }
     );
@@ -54,7 +54,7 @@ function init() {
     'play',
     () => {
       var $this = this;
-      posenet.load().then(function(net) {
+      posenet.load().then(function (net) {
         (function loop() {
           net
             .estimateMutiplePoses(
@@ -66,7 +66,7 @@ function init() {
               scoreThreshold,
               nmsRadius
             )
-            .then(function(pose) {
+            .then(pose => {
               console.log(pose);
               for (var index in pose) {
                 var attr = pose[index]['keypoints'];
@@ -76,11 +76,7 @@ function init() {
                     ctx.beginPath();
                     ctx.fillStyle = 'Red';
                     ctx.rect(Obj.position.x, Obj.position.y, 3, 3);
-                    ctx.fillText(
-                      Obj.part,
-                      Obj.position.x + 10,
-                      Obj.position.y
-                    );
+                    ctx.fillText(Obj.part, Obj.position.x + 10, Obj.position.y);
                     ctx.fillStyle = 'Yellow';
                     ctx.fill();
                   }

@@ -20,7 +20,7 @@
       id="video"
       controls
       autoplay
-      style="display:none;"
+      style="display: none;"
     ></video>
 
     <canvas id="myCanvas" width="400" height="400"></canvas> <br />
@@ -41,27 +41,26 @@
 
     function startWebcam() {
       if (navigator.getUserMedia) {
-        console.log('entered shit');
         navigator.getUserMedia(
           // constraints
           {
             video: true,
-            audio: false
+            audio: false,
           },
 
           // successCallback
-          function(localMediaStream) {
+          function (localMediaStream) {
             console.log(
               'TCL: startWebcam -> localMediaStream',
               localMediaStream
             );
             video = document.querySelector('video');
-            video.src = window.URL.createObjectURL(localMediaStream);
+            video.srcObject = localMediaStream;
             webcamStream = localMediaStream;
           },
 
           // errorCallback
-          function(err) {
+          function (err) {
             console.log('The following error occured: ' + err);
           }
         );
@@ -89,10 +88,10 @@
 
       video.addEventListener(
         'play',
-        function() {
+        function () {
           var $this = this; //cache
 
-          posenet.load().then(function(net) {
+          posenet.load().then(function (net) {
             (function loop() {
               net
                 .estimateMultiplePoses(
@@ -104,7 +103,7 @@
                   scoreThreshold,
                   nmsRadius
                 )
-                .then(function(pose) {
+                .then(function (pose) {
                   for (var index in pose) {
                     var attr = pose[index]['keypoints'];
                     for (var index2 in attr) {
@@ -113,12 +112,7 @@
                       if (Obj.score >= scoreThreshold) {
                         ctx.beginPath();
                         ctx.fillStyle = 'Red';
-                        ctx.rect(
-                          Obj.position.x,
-                          Obj.position.y,
-                          3,
-                          3
-                        );
+                        ctx.rect(Obj.position.x, Obj.position.y, 3, 3);
                         ctx.fillText(
                           Obj.part,
                           Obj.position.x + 10,
